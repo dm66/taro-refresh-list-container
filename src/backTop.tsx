@@ -7,12 +7,11 @@ interface Props{
     className?: string,
     style?: Object | string,
     onClick: Function,
-    onSearchClick?: Function,
-    hasSearch?: boolean,
     scrollEvent: Object,
     icon?: string,
     iconSize?: number,
     color?: string,
+    backTopComponent?: any
 }
 const showBackTopDistance = 300;  // 显示/隐藏返回顶部距离
 
@@ -38,12 +37,14 @@ export default function BackTop(props:Props) {
     return (
         <View style={mergeStyle([style, showBackTop ? style_.show : style_.hide])}>
             {/*返回顶部*/}
-            <View
-                style={mergeStyle([style_.initStyle])}
-                onClick={()=>{ setShowBackTop(()=>false); onClick && onClick() }}
-            >
-                <Text style={mergeStyle([rootStyle, style])} >{this.props.children}</Text>
-            </View>
+            {this.props.backTopComponent ? this.props.backTopComponent : (
+                <View
+                    style={mergeStyle([style_.initStyle])}
+                    onClick={()=>{ setShowBackTop(()=>false); onClick && onClick() }}
+                >
+                    <Text style={mergeStyle([rootStyle, style])} />
+                </View>
+            )}
         </View>
     );
 }
@@ -61,9 +62,6 @@ const style_ = {
         zIndex: 999,
         textAlign: 'center',
         lineHeight: Taro.pxTransform(30)
-    },
-    search: {
-        bottom: Taro.pxTransform(90),
     },
     show: {
         display: 'block'

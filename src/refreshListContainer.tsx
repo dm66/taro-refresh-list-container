@@ -36,8 +36,8 @@ interface Props {
     onTouchStart?: Function,
     onScrollToUpper?: Function,
 
-    onHeaderRefresh?: Function,   //下拉刷新
-    onFooterRefresh?: Function,   //触发加载更多
+    onHeaderRefresh?: Function,   // 下拉刷新
+    onFooterRefresh?: Function,   // 触发加载更多
 
     refreshState?: number,
     loadingMoreText?: string,
@@ -45,6 +45,12 @@ interface Props {
     noMoreDataText?: string,
     emptyDataImg?: Object | any,
     themeColor?: string,
+
+    refreshControl?: any,   // 自定义下拉刷新组件
+    loadingMoreComponent?: any, // 自定义加载更多组件
+    emptyDataComponent?: any,   // 自定义列表空数据组件
+    noMoreData?: any,   // 自定义暂无更多组件
+    backTopComponent?: any  // 自定义返回顶部组件
 }
 interface State {
     winHeight: number,
@@ -204,10 +210,10 @@ export default class RefreshListContainer extends Component<Props, State>{
     * */
     renderEmptyData(emptyDataText){
         const { emptyDataImg } = this.props;
-        return (
-            <View className='posit-abs top-0 bottom-0 left-0 right-0 col-double-center mt-30'>
-                <Image src={`${emptyDataImg}`} mode='aspectFill' className='no-bg' style={style_.emptyDataImg} />
-                <View><Text className='font-lg color-1'>{emptyDataText}</Text></View>
+        return this.props.emptyDataComponent ? this.props.emptyDataComponent : (
+            <View style={mergeStyle([style_.emptyData, style_.colDoubleCenter])} >
+                <Image src={`${emptyDataImg}`} mode='aspectFill' style={style_.emptyDataImg} />
+                <View><Text style={mergeStyle([style_.fontLarge, style_.color666])} >{emptyDataText}</Text></View>
             </View>
         );
     }
@@ -218,7 +224,7 @@ export default class RefreshListContainer extends Component<Props, State>{
     renderHeaderRefresh(){
         const { dargDownStyle } = this.state;
         const { themeColor } = this.props;
-        return (
+        return this.props.refreshControl ? this.props.refreshControl : (
             <View style={mergeStyle([style_.pullDownRefresh, dargDownStyle])}>
                 <AtActivityIndicator color={themeColor} />
             </View>
@@ -230,9 +236,9 @@ export default class RefreshListContainer extends Component<Props, State>{
     * */
     renderLoadingMore(loadingMoreText){
         const { footerStyle } = this.state;
-        return (
-            <View className='pt-sm' style={mergeStyle([{ height: Taro.pxTransform(footerHeight) }, footerStyle])}>
-                <View className='row-double-center'>
+        return this.props.loadingMoreComponent ? this.props.loadingMoreComponent : (
+            <View style={mergeStyle([{ height: Taro.pxTransform(footerHeight) }, footerStyle, style_.pt_sm])}>
+                <View style={style_.rowDoubleCenter}>
                     <AtActivityIndicator content={loadingMoreText} size={24} />
                 </View>
             </View>
@@ -244,9 +250,9 @@ export default class RefreshListContainer extends Component<Props, State>{
     * */
     renderNoMoreData(noMoreDataText){
         const { footerStyle } = this.state;
-        return (
-            <View className='p-x-lg pt-sm text-center' style={mergeStyle([{ height: Taro.pxTransform(footerHeight) }, footerStyle])}>
-                <Text className='color-1 short-line'>{noMoreDataText}</Text>
+        return this.props.noMoreData ? this.props.noMoreData : (
+            <View style={mergeStyle([{ height: Taro.pxTransform(footerHeight) }, footerStyle, style_.noMoreData])}>
+                <Text style={mergeStyle([style_.color666])}>{noMoreDataText}</Text>
             </View>
         );
     }
@@ -260,8 +266,8 @@ export default class RefreshListContainer extends Component<Props, State>{
         return (
             <ScrollView
                 id='scrollView'
-                className={`posit-rel flex-1 ${className}`}
-                style={mergeStyle([{ height: `${winHeight}PX` }, style])}
+                className={className}
+                style={mergeStyle([{ height: `${winHeight}PX` }, style_.positionRel, style_.flex_1, style])}
                 scrollY={refreshState === RefreshState.EmptyData ? false : scrollY}
                 scrollX={scrollX}
                 scrollIntoView={intoView}
@@ -286,7 +292,7 @@ export default class RefreshListContainer extends Component<Props, State>{
                 {/*暂无更多*/}
                 { refreshState === RefreshState.NoMoreData && this.renderNoMoreData(noMoreDataText) }
                 {/*返回顶部*/}
-                <BackTop scrollEvent={scrollEvent} hasSearch={hasSearch} onSearchClick={()=>onSearchClick && onSearchClick()} onClick={()=>this.setState({ intoView: 'top' })} />
+                <BackTop scrollEvent={scrollEvent} onClick={()=>this.setState({ intoView: 'top' })} backTopComponent={this.props.backTopComponent} />
             </ScrollView>
         );
     }
@@ -309,8 +315,49 @@ const style_ = {
         alignItems: 'center',
         justifyContent: 'center'
     },
+    emptyData: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        marginBottom: Taro.pxTransform(30)
+    },
     emptyDataImg: {
         width: Taro.pxTransform(150),
         height: Taro.pxTransform(150),
+    },
+    colDoubleCenter: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    rowDoubleCenter: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    flex_1: {
+        flex: 1
+    },
+    noMoreData: {
+        paddingTop: Taro.pxTransform(6),
+        paddingLeft: Taro.pxTransform(12),
+        paddingRight: Taro.pxTransform(12),
+        textAlign: 'center'
+    },
+    fontLarge: {
+        fontSize: Taro.pxTransform(15)
+    },
+    color666: {
+        color: '#666'
+    },
+    positionRel: {
+        position: 'relative'
+    },
+    pt_sm: {
+        paddingTop: Taro.pxTransform(6)
     }
 };
